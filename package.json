@@ -1,0 +1,35 @@
+{
+  "name": "scrcpy-jev",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A fast local Android agent: Jev makes typed decisions, scrcpy and adb execute them.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "dev": "node scripts/studio.mjs dev",
+    "start": "node scripts/studio.mjs start",
+    "agent": "node scripts/run.mjs",
+    "devices": "node scripts/run.mjs devices",
+    "doctor": "node scripts/run.mjs doctor",
+    "helper": "node scripts/build-helper.mjs",
+    "test": "node --test test/*.test.mjs",
+    "format": "prettier . --check",
+    "format:fix": "prettier . --write",
+    "check": "npm test && npm run format"
+  },
+  "dependencies": {
+    "@yume-chan/adb": "^2.6.4",
+    "@yume-chan/adb-scrcpy": "^2.3.2",
+    "@yume-chan/adb-server-node-tcp": "^2.5.2",
+    "@yume-chan/scrcpy": "^2.3.0",
+    "@yume-chan/stream-extra": "^2.1.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "prettier": "3.8.1",
+    "linkedom": "^0.18.9"
+  }
+}

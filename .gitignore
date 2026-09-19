@@ -1,0 +1,7 @@
+artifacts/
+node_modules/
+.env
+.env.local
+src/device/helper/*.jar
+src/device/helper/classes.dex
+*.tmp.mjs

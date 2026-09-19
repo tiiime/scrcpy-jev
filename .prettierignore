@@ -1,0 +1,6 @@
+node_modules
+artifacts
+.env
+.env.local
+src/device/helper/*.jar
+src/device/helper/classes.dex

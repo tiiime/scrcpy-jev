@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>scrcpy-jev · local Android agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/studio.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23397fe8'/%3E%3Cpath d='M10 21V11h3.2v7.2H22V21z' fill='white'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <div class="studio-shell">
+      <aside class="rail" aria-label="Studio navigation">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="rail-items">
+          <button
+            class="rail-button selected"
+            data-panel="activity"
+            title="Workspace"
+            aria-label="Workspace"
+          >
+            <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+              <path
+                d="M9 6l6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            class="rail-button"
+            data-panel="history"
+            title="Run history"
+            aria-label="Run history"
+          >
+            <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+              <path
+                d="M12 7v5l3 2M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4v3.5H7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="rail-bottom">
+          <span class="rail-label">SCRCPY</span>
+          <span class="avatar">J</span>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <main>
+          <div class="work-grid">
+            <section class="control-column">
+              <div class="composer panel">
+                <div class="section-heading">
+                  <span class="section-index">01</span>
+                  <h2>What&rsquo;s the mission?</h2>
+                  <span class="live-model" id="model-badge">
+                    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                      <path d="M13 2 4.5 13.5H11L10 22l9-11.5h-6.5z" fill="currentColor" />
+                    </svg>
+                    <span id="model-name">jev-latest</span>
+                  </span>
+                </div>
+                <label class="sr-only" for="goal">Task goal</label>
+                <textarea
+                  id="goal"
+                  maxlength="4000"
+                  placeholder="Ask Jev to do something on your phone…"
+                ></textarea>
+                <div class="composer-footer">
+                  <label class="step-select">
+                    <span>Step limit</span>
+                    <select id="max-steps" aria-label="Step limit">
+                      <option value="10">10 steps</option>
+                      <option value="20">20 steps</option>
+                      <option value="30" selected>30 steps</option>
+                      <option value="50">50 steps</option>
+                    </select>
+                  </label>
+                  <button class="run-button" id="run-button">
+                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                      <path d="M6 4l14 8-14 8z" fill="currentColor" />
+                    </svg>
+                    Run task<span class="shortcut">⌘ ↵</span>
+                  </button>
+                  <button class="stop-button" id="stop-button" hidden>
+                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                      <rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" />
+                    </svg>
+                    <span id="stop-label">Stop task</span>
+                  </button>
+                </div>
+                <div class="inline-error" id="error" role="alert" hidden>
+                  <span id="error-text"></span>
+                  <button id="error-dismiss" aria-label="Dismiss error">×</button>
+                </div>
+              </div>
+
+              <div class="suggestions">
+                <span>A place to start</span>
+                <div id="suggestions"></div>
+              </div>
+
+              <div class="telemetry" id="telemetry">
+                <div class="clock-block">
+                  <div class="metric-label">
+                    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                      />
+                      <path
+                        d="M12 7v5l3 2"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    TASK TIME<span class="clock-live" id="clock-live" hidden></span>
+                  </div>
+                  <div class="task-clock" aria-label="Task elapsed time">
+                    <span id="clock-main">00:00</span
+                    ><span class="clock-fraction" id="clock-fraction">.00</span>
+                  </div>
+                </div>
+                <div class="small-metric">
+                  <div class="metric-label">ACTIONS</div>
+                  <strong id="metric-actions">00</strong>
+                  <span id="metric-actions-note">ready to execute</span>
+                </div>
+                <div class="small-metric">
+                  <div class="metric-label">MODEL LATENCY</div>
+                  <strong id="metric-latency">—</strong>
+                  <span>average decision</span>
+                </div>
+              </div>
+
+              <div class="activity panel">
+                <div class="activity-heading">
+                  <div class="tabs">
+                    <button class="tab active" data-tab="activity">
+                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                        <path
+                          d="M5 7l5 5-5 5M13 17h6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      Live activity<span id="action-count" hidden>0</span>
+                    </button>
+                    <button class="tab" data-tab="history">
+                      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                        <path
+                          d="M12 7v5l3 2M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4v3.5H7"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      Recent runs
+                    </button>
+                  </div>
+                  <div class="activity-controls">
+                    <span class="task-status" id="task-status"><i></i><span>Standby</span></span>
+                    <button
+                      class="clear-button"
+                      id="clear-button"
+                      title="Clear recent runs and reset the timer"
+                    >
+                      <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                        <path
+                          d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div class="activity-body" id="activity-body" aria-live="polite"></div>
+                <div class="history-list" id="history-list" hidden></div>
+                <div class="activity-footer">
+                  <span
+                    ><span class="tiny-dot" id="stream-dot"></span
+                    ><span id="footer-state">All actions selected by Jev</span></span
+                  >
+                  <span id="footer-id">SESSION READY</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="device-column">
+              <div class="device-heading">
+                <div>
+                  <span class="section-index">02</span>
+                  <h2>Your live device</h2>
+                </div>
+                <span class="connection-badge" id="connection-badge"
+                  ><i></i><span>CONNECTING</span></span
+                >
+              </div>
+              <div class="device-stage" id="device-stage">
+                <div class="stage-label">
+                  <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                    <rect
+                      x="7"
+                      y="2.5"
+                      width="10"
+                      height="19"
+                      rx="2.4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M10.6 5.4h2.8"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <span id="device-name">Your phone</span>
+                </div>
+                <button
+                  class="expand-button"
+                  id="expand-button"
+                  title="Expand device view"
+                  aria-label="Expand device view"
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                    <path
+                      d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <div class="stage-grid"></div>
+                <div class="phone-frame">
+                  <div class="phone-screen">
+                    <canvas id="screen" width="464" height="1024"></canvas>
+                    <div class="stream-error" id="stream-error" hidden>
+                      <h3>Waiting for the stream</h3>
+                      <p id="stream-error-text">The scrcpy video stream is not available yet.</p>
+                      <button id="reconnect-button">Reconnect</button>
+                    </div>
+                    <div class="stream-note" id="stream-note" hidden></div>
+                  </div>
+                </div>
+                <div class="device-navigation">
+                  <button id="nav-back" title="Back" aria-label="Android back">
+                    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+                      <path
+                        d="M15 5l-7 7 7 7"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button id="nav-home" title="Home" aria-label="Android home">
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="7"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                      />
+                    </svg>
+                  </button>
+                  <button id="nav-recent" title="Recent apps" aria-label="Android recent apps">
+                    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+                      <rect
+                        x="5"
+                        y="5"
+                        width="14"
+                        height="14"
+                        rx="2.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                      />
+                    </svg>
+                  </button>
+                  <span></span>
+                  <button
+                    id="nav-power"
+                    title="Toggle screen power"
+                    aria-label="Toggle screen power"
+                  >
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                      <path
+                        d="M12 4v8"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                      />
+                      <path
+                        d="M7.5 7a7 7 0 1 0 9 0"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div class="stage-caption">
+                  <i></i>
+                  <span id="stage-caption">Touch &amp; keyboard enabled</span>
+                  <span id="stage-transport">ANDROID · SCRCPY</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="/studio.js"></script>
+  </body>
+</html>
